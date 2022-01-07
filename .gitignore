@@ -37,3 +37,10 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# files/folders to be ignored
+data/
+plots/
+output/
+Rumex.Rproj
+hastatus.R
