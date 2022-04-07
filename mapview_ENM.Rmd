@@ -1,6 +1,6 @@
 ---
-title: "Mapview of ecological niche models"
-author: "Eric Martiné's Master thesis"
+title: "The South Asian monsoon maintains the disjunction of *Rumex hastatus* between the Western Himalayas and the Hengduan Mountains, Southwest China"
+author: "Martiné et al. 2022 (Nord J Bot)"
 output: html_document
 knit: (function(input_file, encoding) {
   out_dir <- 'docs';
@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = FALSE)
 library(mapview)
 library(raster)
 library(sp)
-library(scales)
+library(viridis)
 
 # load occurrences
 sp <- read.csv2("data/occ/hastatus_all.csv")
@@ -29,29 +29,29 @@ sp$species <- 1 # 1 for presence (presence-only data)
 coordinates(sp) <- c("decimalLongitude", "decimalLatitude")
 
 # load raster layers with predictions
-pp.avg   <- raster("output/ensemble/pp_avg_rf-down.tif")
-plgm.avg <- raster("output/ensemble/plgm_avg_rf-down.tif")
-p26.avg  <- raster("output/ensemble/p26_avg_rf-down.tif")
-p45.avg  <- raster("output/ensemble/p45_avg_rf-down.tif")
-p60.avg  <- raster("output/ensemble/p60_avg_rf-down.tif")
-p85.avg  <- raster("output/ensemble/p85_avg_rf-down.tif")
+present <- raster("output/ensemble/pp_avg_rf-down.tif")
+lgm     <- raster("output/ensemble/plgm_avg_rf-down.tif")
+rcp2.6  <- raster("output/ensemble/p26_avg_rf-down.tif")
+rcp4.5  <- raster("output/ensemble/p45_avg_rf-down.tif")
+rcp6.0  <- raster("output/ensemble/p60_avg_rf-down.tif")
+rcp8.5  <- raster("output/ensemble/p85_avg_rf-down.tif")
 
 # define coordinate reference system for sp
-projection(sp) <- projection(pp.avg)
+projection(sp) <- projection(present)
 
 # define color palette
-cl1 <- viridis_pal(alpha = 1, direction = 1)
+mako <- mako(100, alpha = 1, direction = 1)
 ```
 
 
 
-This site provides extended visualizations of the ecological niche modeling output created in my Master thesis. I present six habitat suitability maps of *Rumex hastatus* for the past (LGM; CHELSA-PMIP3 CCSM4), present (1979-2013; CHELSA bioclim) and future (2061-2080; CHELSA-CMIP5 CCSM4; RCPs 2.6, 4.5, 6.0 and 8.5). They can be interactively viewed using the [mapview](https://r-spatial.github.io/mapview/) package and make up for the restricted view in the printed version of my thesis. Enjoy!
+This site provides extended visualizations of the ecological niche modeling output presented in Martiné et al. (2022). Here, we present six habitat suitability maps of *Rumex hastatus* for the past (LGM; CHELSA-PMIP3 CCSM4), present (1979-2013; CHELSA bioclim) and future (2061-2080; CHELSA-CMIP5 CCSM4; RCPs 2.6, 4.5, 6.0 and 8.5). They can be interactively viewed using the [mapview](https://r-spatial.github.io/mapview/) package and make up for the restricted view in the online/printed version of our paper. Enjoy!
 
 
 
 ### LGM
 ```{r echo = FALSE, warning = FALSE}
-mapview(plgm.avg, col.regions = cl1(120))
+mapview(lgm, col.regions = mako)
 ```
 
 
@@ -59,35 +59,35 @@ mapview(plgm.avg, col.regions = cl1(120))
 ### Present
 Occurrences of *Rumex hastatus* from GBIF and field work are indicated as blue dots.
 ```{r echo = FALSE, warning = FALSE}
-mapview(pp.avg, col.regions = cl1(120)) + sp
+mapview(present, col.regions = mako) + sp
 ```
 
 
 
 ### Future RCP 2.6
 ```{r echo = FALSE, warning = FALSE}
-mapview(p26.avg, col.regions = cl1(120))
+mapview(rcp2.6, col.regions = mako)
 ```
 
 
 
 ### Future RCP 4.5
 ```{r echo = FALSE, warning = FALSE}
-mapview(p45.avg, col.regions = cl1(120))
+mapview(rcp4.5, col.regions = mako)
 ```
 
 
 
 ### Future RCP 6.0
 ```{r echo = FALSE, warning = FALSE}
-mapview(p60.avg, col.regions = cl1(120))
+mapview(rcp6.0, col.regions = mako)
 ```
 
 
 
 ### Future RCP 8.5
 ```{r echo = FALSE, warning = FALSE}
-mapview(p85.avg, col.regions = cl1(120))
+mapview(rcp8.5, col.regions = mako)
 ```
 
 
