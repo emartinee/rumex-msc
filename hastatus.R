@@ -438,7 +438,7 @@ sa2 <- ggplot() +
   labs(x = "Longitude", y = "Latitude", fill = "Elevation (m)")
 sa2
 
-ggsave("fig_s1.png", plot = sa2,      # save as png
+ggsave("fig_s1.png", plot = sa2,       # save as png
        path = "plots/suppl", device = "png",
        width = 16, height = 8 , units = c("cm"), dpi = 330)
 
