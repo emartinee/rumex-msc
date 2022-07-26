@@ -280,7 +280,6 @@ theme_set(theme_bw())
 
 # occ, gap & elev data
 sp <- read.csv2("data/occ/hastatus_all.csv")
-riv_lab <- read.csv2("data/hydro/rivers.csv")
 gap.pts <- read.csv2("data/pca/d_gap_elev.csv", header = T)
 gap.pts <- gap.pts[, c(1,2,5)]
 head(gap.pts)
@@ -291,7 +290,7 @@ head(rivers)
 rivers@data$RIVER
 
 my_rivers <- c("Salween", "Mekong", "Lancang Jiang", "Mekong (also Lancang Jiang)", "Yangtze", "Brahmaputra")
-my_rivers2 <- c("Yarkant He", "Gandak", "Irrawaddy", "Min Jiang", "Yalong Jiang", "Yuan Jiang") #, "Red")
+my_rivers2 <- c("Yarkant He", "Irrawaddy", "Min Jiang", "Yalong Jiang", "Yuan Jiang", "Red")
 
 rivers_sa <- rivers[rivers@data$RIVER %in% my_rivers, ]
 rivers.df <- fortify(rivers_sa)
@@ -331,6 +330,11 @@ hdm <- read.csv2("data/spatial/hdm.csv")
 tibet <- read.csv2("data/spatial/tibet.csv")
 rect_sa <- read.csv2("data/spatial/rect_sa.csv")
 rect_gap <- read.csv2("data/spatial/rect_gap.csv")
+riv_lab <- read.csv2("data/hydro/rivers.csv")
+riv_lab2 <- read.csv2("data/hydro/rivers2.csv")
+places <- read.csv2("data/spatial/places.csv")
+cities <- read.csv2("data/spatial/cities.csv")
+cities_lab <- read.csv2("data/spatial/cities-lab.csv")
 
 # plot sa (Figure 1)
 sa <- ggplot() +
@@ -442,32 +446,24 @@ ggsave("fig_s1.png", plot = sa2,       # save as png
        path = "plots/suppl", device = "png",
        width = 16, height = 8 , units = c("cm"), dpi = 330)
 
-# plot all places mentioned in manuscript (Figure S2)
-sa2 <- ggplot() +
+# plot all places mentioned in manuscript (Figure S10)
+sa10 <- ggplot() +
   geom_raster(data = srtm_df, aes(lon, lat, fill = elev)) +
   scale_fill_gradient(low = "grey90", high = "grey10") +
-  geom_path(data = rect_sa, aes(x = lon, y = lat), 
-            color = "black", size = .4, linetype = "dashed") +
   geom_sf(data = world, col = "black", fill = NA, size = 0.1) +
-  geom_path(data = rivers.df, aes(x = long, y = lat, group = group), 
+  geom_path(data = rivers.df2, aes(x = long, y = lat, group = group), 
             color = "dodgerblue", size = 0.4) +
   geom_text(data= world_pts, aes(x = X, y = Y, label = name),
             color = "black", fontface = "bold", check_overlap = FALSE, 
             size = 2) +
-  geom_text(data = riv_lab, aes(lon, lat, label = river),
-            color = "white", size = 2, fontface = "bold", angle = -45) +
-  geom_text(data = him, aes(lon, lat, label = mtn),
-            color = "black", size = 3.6, fontface = "bold", angle = -45) +
-  geom_text(data = hdm, aes(lon, lat, label = mtn),
-            color = "black", size = 3.2, fontface = "bold", angle = 30) +
-  geom_text(data = tibet, aes(lon, lat, label = mtn),
-            color = "black", size = 3, fontface = "bold") +
-  geom_path(data = rect_gap, aes(x = lon, y = lat), 
-            color = "black", size = .4) +
-  geom_point(data = gap.pts, aes(x = lon, 
-                                 y = lat),
-             size = 1.25, shape = 21,
-             color = "white", fill = "#e41a1c") +
+  #geom_text(data = riv_lab2, aes(lon, lat, label = river),
+   #         color = "white", size = 2, fontface = "bold", angle = -45) +
+  geom_point(data = cities, aes(lon, lat),
+            color = "black", fill = "white",  size = 1, shape = 21) +
+  geom_text(data = cities_lab, aes(lon, lat, label = city_lab),
+            color = "white", size = 1.6, fontface = "bold", angle = -30) +
+  geom_text(data = places, aes(lon, lat, label = place),
+            color = "black", size = 1.8, angle = -30) +
   annotation_scale(pad_x = unit(8.35, "cm"), 
                    pad_y = unit(5.95, "cm"),
                    height = unit(0.1, "cm"),
@@ -493,9 +489,9 @@ sa2 <- ggplot() +
         axis.text.y = element_text(size = 8),
         axis.title = element_text(size = 8)) +
   labs(x = "Longitude", y = "Latitude", fill = "Elevation (m)")
-sa2
+sa10
 
-ggsave("fig_s1.png", plot = sa2,      # save as png
+ggsave("fig_s10.png", plot = sa10,      # save as png
        path = "plots/suppl", device = "png",
        width = 16, height = 8 , units = c("cm"), dpi = 330)
 #-----------------------------------------------------------#
