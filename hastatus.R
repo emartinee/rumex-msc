@@ -451,13 +451,17 @@ sa10 <- ggplot() +
   geom_raster(data = srtm_df, aes(lon, lat, fill = elev)) +
   scale_fill_gradient(low = "grey90", high = "grey10") +
   geom_sf(data = world, col = "black", fill = NA, size = 0.1) +
+  geom_path(data = rivers.df, aes(x = long, y = lat, group = group), 
+            color = "dodgerblue", size = 0.4) +
   geom_path(data = rivers.df2, aes(x = long, y = lat, group = group), 
             color = "dodgerblue", size = 0.4) +
   geom_text(data= world_pts, aes(x = X, y = Y, label = name),
             color = "black", fontface = "bold", check_overlap = FALSE, 
             size = 2) +
-  #geom_text(data = riv_lab2, aes(lon, lat, label = river),
-   #         color = "white", size = 2, fontface = "bold", angle = -45) +
+  geom_text(data = riv_lab, aes(lon, lat, label = river),
+            color = "white", size = 2, fontface = "bold", angle = -45) +
+  geom_text(data = riv_lab2, aes(lon, lat, label = river),
+            color = "white", size = 2, fontface = "bold", angle = -45) +
   geom_point(data = cities, aes(lon, lat),
             color = "black", fill = "white",  size = 1, shape = 21) +
   geom_text(data = cities_lab, aes(lon, lat, label = city_lab),
