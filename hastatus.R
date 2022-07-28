@@ -3200,7 +3200,7 @@ wilcox.test(envi_unscaled.df$bio18 ~ gr)
 #--------------------------------#
 #---4 Figure assembly-------------
 
-# Figure 1 --> stuy_area_map
+# Figure 1 --> study_area_map
 
 # Figure 2
 fig2 <- f1 / (pca.plot | ld1) +
@@ -3254,5 +3254,25 @@ ggsave("fig4.pdf", plot = fig4,      # save as pdf
 ggsave("fig4.png", plot = fig4,      # save as png
        path = "plots/figs", device = "png",
        width = 16, height = 16 , units = c("cm"), dpi = 330)
+
+# Figure 3 new
+layout3 <- "
+AABB
+CCCC
+DDDD
+"
+
+fig3new <- f2 + f4 + lgmpp.f + pp45.f +
+  plot_layout(design = layout3, heights = c(1, 2, 2)) +
+  plot_annotation(tag_levels = "a") & 
+  theme(plot.tag = element_text(size = 12, face = "bold"))
+
+ggsave("fig3new.pdf", plot = fig3new,      # save as pdf
+       path = "plots/figs", device = "pdf",
+       width = 16, height = 20, units = c("cm"), dpi = 300)
+
+ggsave("fig3new.png", plot = fig3new,      # save as png
+       path = "plots/figs", device = "png",
+       width = 16, height = 20 , units = c("cm"), dpi = 330)
 #--------------------------------------------------------------------------#
 ####---STOP---####
