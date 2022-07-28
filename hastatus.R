@@ -1990,37 +1990,38 @@ p85.avg  <- raster("output/ensemble/p85_avg_rf-down.tif")
 
 #---2.6.1 Binarized range shift (threshold set to maximizing tss)----
 
-# set threshold for max TSS (for train and test data)
+# set threshold for max TSS (for train data)
 th1 <- 0.63
-th1
 
-# convert pastm current and future prob of occurrences to TSS-thresholded presences and absences
+# convert past, current and future prob of occurrences to TSS-thresholded presences and absences
 pa1 <- raster(pp.avg) # create empty raster with same extent and resolution than en1
 pa1[] <- ifelse(pp.avg[] >= th1, 1, 0) # which pixels within pp.avg >= than th, if yes 1, if no 0
 plot(pa1) 
 
-#pa2 <- raster(p26.avg) # create empty raster with same extent and resolution than en2
-#pa2[] <- ifelse(p26.avg[] >= th1, 1, 0) # which pixels within p26.avg >= than th, if yes 1, if no 0
-#plot(pa2) 
+pa2 <- raster(p26.avg) # create empty raster with same extent and resolution than en2
+pa2[] <- ifelse(p26.avg[] >= th1, 1, 0) # which pixels within p26.avg >= than th, if yes 1, if no 0
+plot(pa2) 
 
 pa3 <- raster(p45.avg) # create empty raster with same extent and resolution than en2
 pa3[] <- ifelse(p45.avg[] >= th1, 1, 0) # which pixels within p45.avg >= than th, if yes 1, if no 0
 plot(pa3)
 
-#pa4 <- raster(p60.avg) # create empty raster with same extent and resolution than en2
-#pa4[] <- ifelse(p60.avg[] >= th1, 1, 0) # which pixels within p60.avg >= than th, if yes 1, if no 0
-#plot(pa4)
+pa4 <- raster(p60.avg) # create empty raster with same extent and resolution than en2
+pa4[] <- ifelse(p60.avg[] >= th1, 1, 0) # which pixels within p60.avg >= than th, if yes 1, if no 0
+plot(pa4)
 
-#pa5 <- raster(p85.avg) # create empty raster with same extent and resolution than en2
-#pa5[] <- ifelse(p85.avg[] >= th1, 1, 0) # which pixels within p85.avg >= than th, if yes 1, if no 0
-#plot(pa5)
+pa5 <- raster(p85.avg) # create empty raster with same extent and resolution than en2
+pa5[] <- ifelse(p85.avg[] >= th1, 1, 0) # which pixels within p85.avg >= than th, if yes 1, if no 0
+plot(pa5)
 
 pa6 <- raster(plgm.avg) # create empty raster with same extent and resolution than en1
 pa6[] <- ifelse(plgm.avg[] >= th1, 1, 0) # which pixels within plgm.avg >= than th, if yes 1, if no 0
 plot(pa6) 
 
+#---2.6.1.1 LGM - RCP 4.5----
+
 # stabilization from lgm to future 45
-paletti <- colorRampPalette(c("red", "yellow", "green"))
+paletti <- colorRampPalette(c("chocolate", "yellow", "lightgreen"))
 stabil <- pa6+pa1+pa3 # cells with value = 3 have always been stable (suitable)
 plot(stabil, col = paletti(3))
 
@@ -2028,8 +2029,7 @@ plot(stabil, col = paletti(3))
 changelgm45b <- pa3 - pa6
 plot(changelgm45b, col = paletti(3))
 
-## make dfs
-# gain and loss
+# gain and loss 
 changex.pts <- rasterToPoints(changelgm45b)
 changex.df <- data.frame(changex.pts)
 colnames(changex.df) <- c("lon", "lat", "niche")
@@ -2111,6 +2111,357 @@ change.f
 ggsave("changes_bin.pdf", plot = change.f,      # save as pdf
        path = "plots/sdm/publ", device = "pdf",
        width = 16, height = 12 , units = c("cm"), dpi = 300)
+
+#---2.6.1.2 LGM - PP----
+
+# change from lgm to present (Fig 3c)
+changelgmppb <- pa1 - pa6
+
+# gain and loss 
+changelgmpp.pts <- rasterToPoints(changelgmppb)
+changelgmpp.df <- data.frame(changelgmpp.pts)
+colnames(changelgmpp.df) <- c("lon", "lat", "niche")
+head(changelgmpp.df)
+
+# extract gains
+gain <- "1"
+lgmppG.df <- filter(changelgmpp.df, niche %in% gain)
+
+lgmppG.df <- mutate(lgmppG.df, 
+                    niche = factor(case_when(niche %in% gain ~ "Gain")))
+head(lgmppG.df)
+
+# extract losses
+loss <- "-1"
+lgmppL.df <- filter(changelgmpp.df, niche %in% loss)
+
+lgmppL.df <- mutate(lgmppL.df, 
+                     niche = factor(case_when(niche %in% loss ~ "Loss")))
+head(lgmppL.df)
+
+# combine dfs
+lgmppGL.df <- rbind(lgmppG.df, lgmppL.df)
+
+# plot
+lgmpp.f <- ggplot() +
+  geom_raster(data = srtm_df, aes(lon, lat, fill = elev)) +
+  scale_fill_gradient(low = "grey90", high = "grey10") +
+  geom_sf(data = world, col = "black", fill = NA, size = 0.1) +
+  guides(fill = "none") +
+  new_scale_fill() +
+  geom_raster(data = lgmppGL.df, aes(lon, lat, fill = niche)) +
+  scale_fill_manual(values =  c("#80cdc1", "#d73027")) +
+  geom_path(data = rivers.df, aes(x = long, y = lat, group = group), 
+            color = "dodgerblue", size = 0.3) +
+  geom_text(data = riv_lab, aes(lon, lat, label = river),
+            color = "white", size = 2, fontface = "bold", angle = -45) +
+  annotation_scale(pad_x = unit(7.7, "cm"), 
+                   pad_y = unit(5.5, "cm"),
+                   height = unit(0.1, "cm"),
+                   text_cex = 0.55) +
+  annotation_north_arrow(which_north = "true", 
+                         height = unit(.6, "cm"),
+                         width = unit(.5, "cm"),
+                         pad_x = unit(0.1, "cm"), 
+                         pad_y = unit(0.1, "cm"),
+                         style = north_arrow_fancy_orienteering) +
+  coord_sf(xlim = c(66, 106.5), 
+           ylim = c(20.8, 39), 
+           expand = FALSE) +
+  theme(legend.key.size = unit(0.4, 'cm'), 
+        legend.key.height = unit(0.4, 'cm'), 
+        legend.key.width = unit(0.4, 'cm'), 
+        legend.title = element_text(size = 7.5, face = "bold"), 
+        legend.text = element_text(size = 7.25),
+        panel.background =  element_rect(fill = "aliceblue"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8),
+        axis.title = element_text(size = 8)) +
+  labs(x = "Longitude", y = "Latitude", fill = "Habitat") 
+lgmpp.f
+
+
+#---2.6.1.3 PP - RCP 4.5----
+
+# change from present to future 45 (Fig 3d)
+changepp45b <- pa3 - pa1
+
+# gain and loss 
+changepp45.pts <- rasterToPoints(changepp45b)
+changepp45.df <- data.frame(changepp45.pts)
+colnames(changepp45.df) <- c("lon", "lat", "niche")
+head(changepp45.df)
+
+# extract gains
+gain <- "1"
+pp45G.df <- filter(changepp45.df, niche %in% gain)
+
+pp45G.df <- mutate(pp45G.df, 
+                    niche = factor(case_when(niche %in% gain ~ "Gain")))
+head(pp45G.df)
+
+# extract losses
+loss <- "-1"
+pp45L.df <- filter(changepp45.df, niche %in% loss)
+
+pp45L.df <- mutate(pp45L.df, 
+                    niche = factor(case_when(niche %in% loss ~ "Loss")))
+head(pp45L.df)
+
+# combine dfs
+pp45GL.df <- rbind(pp45G.df, pp45L.df)
+
+# plot
+pp45.f <- ggplot() +
+  geom_raster(data = srtm_df, aes(lon, lat, fill = elev)) +
+  scale_fill_gradient(low = "grey90", high = "grey10") +
+  geom_sf(data = world, col = "black", fill = NA, size = 0.1) +
+  guides(fill = "none") +
+  new_scale_fill() +
+  geom_raster(data = pp45GL.df, aes(lon, lat, fill = niche)) +
+  scale_fill_manual(values =  c("#80cdc1", "#d73027")) +
+  geom_path(data = rivers.df, aes(x = long, y = lat, group = group), 
+            color = "dodgerblue", size = 0.3) +
+  geom_text(data = riv_lab, aes(lon, lat, label = river),
+            color = "white", size = 2, fontface = "bold", angle = -45) +
+  annotation_scale(pad_x = unit(7.7, "cm"), 
+                   pad_y = unit(5.5, "cm"),
+                   height = unit(0.1, "cm"),
+                   text_cex = 0.55) +
+  annotation_north_arrow(which_north = "true", 
+                         height = unit(.6, "cm"),
+                         width = unit(.5, "cm"),
+                         pad_x = unit(0.1, "cm"), 
+                         pad_y = unit(0.1, "cm"),
+                         style = north_arrow_fancy_orienteering) +
+  coord_sf(xlim = c(66, 106.5), 
+           ylim = c(20.8, 39), 
+           expand = FALSE) +
+  theme(legend.key.size = unit(0.4, 'cm'), 
+        legend.key.height = unit(0.4, 'cm'), 
+        legend.key.width = unit(0.4, 'cm'), 
+        legend.title = element_text(size = 7.5, face = "bold"), 
+        legend.text = element_text(size = 7.25),
+        panel.background =  element_rect(fill = "aliceblue"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8),
+        axis.title = element_text(size = 8)) +
+  labs(x = "Longitude", y = "Latitude", fill = "Habitat") 
+pp45.f
+
+#---2.6.1.4 PP - RCP 2.6----
+
+# change from present to future 26 (Fig S5b)
+changepp26b <- pa2 - pa1
+
+# gain and loss 
+changepp26.pts <- rasterToPoints(changepp26b)
+changepp26.df <- data.frame(changepp26.pts)
+colnames(changepp26.df) <- c("lon", "lat", "niche")
+head(changepp26.df)
+
+# extract gains
+gain <- "1"
+pp26G.df <- filter(changepp26.df, niche %in% gain)
+
+pp26G.df <- mutate(pp26G.df, 
+                   niche = factor(case_when(niche %in% gain ~ "Gain")))
+head(pp26G.df)
+
+# extract losses
+loss <- "-1"
+pp26L.df <- filter(changepp26.df, niche %in% loss)
+
+pp26L.df <- mutate(pp26L.df, 
+                   niche = factor(case_when(niche %in% loss ~ "Loss")))
+head(pp26L.df)
+
+# combine dfs
+pp26GL.df <- rbind(pp26G.df, pp26L.df)
+
+# plot
+pp26.f <- ggplot() +
+  geom_raster(data = srtm_df, aes(lon, lat, fill = elev)) +
+  scale_fill_gradient(low = "grey90", high = "grey10") +
+  geom_sf(data = world, col = "black", fill = NA, size = 0.1) +
+  guides(fill = "none") +
+  new_scale_fill() +
+  geom_raster(data = pp26GL.df, aes(lon, lat, fill = niche)) +
+  scale_fill_manual(values =  c("#80cdc1", "#d73027")) +
+  geom_path(data = rivers.df, aes(x = long, y = lat, group = group), 
+            color = "dodgerblue", size = 0.3) +
+  geom_text(data = riv_lab, aes(lon, lat, label = river),
+            color = "white", size = 2, fontface = "bold", angle = -45) +
+  annotation_scale(pad_x = unit(7.7, "cm"), 
+                   pad_y = unit(5.5, "cm"),
+                   height = unit(0.1, "cm"),
+                   text_cex = 0.55) +
+  annotation_north_arrow(which_north = "true", 
+                         height = unit(.6, "cm"),
+                         width = unit(.5, "cm"),
+                         pad_x = unit(0.1, "cm"), 
+                         pad_y = unit(0.1, "cm"),
+                         style = north_arrow_fancy_orienteering) +
+  coord_sf(xlim = c(66, 106.5), 
+           ylim = c(20.8, 39), 
+           expand = FALSE) +
+  theme(legend.key.size = unit(0.4, 'cm'), 
+        legend.key.height = unit(0.4, 'cm'), 
+        legend.key.width = unit(0.4, 'cm'), 
+        legend.title = element_text(size = 7.5, face = "bold"), 
+        legend.text = element_text(size = 7.25),
+        panel.background =  element_rect(fill = "aliceblue"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8),
+        axis.title = element_text(size = 8)) +
+  labs(x = "Longitude", y = "Latitude", fill = "Habitat") 
+pp26.f
+
+#---2.6.1.5 PP - RCP 6.0----
+
+# change from present to future 60 (Fig Fig S6b)
+changepp60b <- pa4 - pa1
+
+# gain and loss 
+changepp60.pts <- rasterToPoints(changepp60b)
+changepp60.df <- data.frame(changepp60.pts)
+colnames(changepp60.df) <- c("lon", "lat", "niche")
+head(changepp60.df)
+
+# extract gains
+gain <- "1"
+pp60G.df <- filter(changepp60.df, niche %in% gain)
+
+pp60G.df <- mutate(pp60G.df, 
+                   niche = factor(case_when(niche %in% gain ~ "Gain")))
+head(pp60G.df)
+
+# extract losses
+loss <- "-1"
+pp60L.df <- filter(changepp60.df, niche %in% loss)
+
+pp60L.df <- mutate(pp60L.df, 
+                   niche = factor(case_when(niche %in% loss ~ "Loss")))
+head(pp60L.df)
+
+# combine dfs
+pp60GL.df <- rbind(pp60G.df, pp60L.df)
+
+# plot
+pp60.f <- ggplot() +
+  geom_raster(data = srtm_df, aes(lon, lat, fill = elev)) +
+  scale_fill_gradient(low = "grey90", high = "grey10") +
+  geom_sf(data = world, col = "black", fill = NA, size = 0.1) +
+  guides(fill = "none") +
+  new_scale_fill() +
+  geom_raster(data = pp60GL.df, aes(lon, lat, fill = niche)) +
+  scale_fill_manual(values =  c("#80cdc1", "#d73027")) +
+  geom_path(data = rivers.df, aes(x = long, y = lat, group = group), 
+            color = "dodgerblue", size = 0.3) +
+  geom_text(data = riv_lab, aes(lon, lat, label = river),
+            color = "white", size = 2, fontface = "bold", angle = -45) +
+  annotation_scale(pad_x = unit(7.7, "cm"), 
+                   pad_y = unit(5.5, "cm"),
+                   height = unit(0.1, "cm"),
+                   text_cex = 0.55) +
+  annotation_north_arrow(which_north = "true", 
+                         height = unit(.6, "cm"),
+                         width = unit(.5, "cm"),
+                         pad_x = unit(0.1, "cm"), 
+                         pad_y = unit(0.1, "cm"),
+                         style = north_arrow_fancy_orienteering) +
+  coord_sf(xlim = c(66, 106.5), 
+           ylim = c(20.8, 39), 
+           expand = FALSE) +
+  theme(legend.key.size = unit(0.4, 'cm'), 
+        legend.key.height = unit(0.4, 'cm'), 
+        legend.key.width = unit(0.4, 'cm'), 
+        legend.title = element_text(size = 7.5, face = "bold"), 
+        legend.text = element_text(size = 7.25),
+        panel.background =  element_rect(fill = "aliceblue"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8),
+        axis.title = element_text(size = 8)) +
+  labs(x = "Longitude", y = "Latitude", fill = "Habitat") 
+pp60.f
+
+#---2.6.1.6 PP - RCP 8.5----
+
+# change from present to future 85 (Fig Fig S7b)
+changepp85b <- pa5 - pa1
+
+# gain and loss 
+changepp85.pts <- rasterToPoints(changepp85b)
+changepp85.df <- data.frame(changepp85.pts)
+colnames(changepp85.df) <- c("lon", "lat", "niche")
+head(changepp85.df)
+
+# extract gains
+gain <- "1"
+pp85G.df <- filter(changepp85.df, niche %in% gain)
+
+pp85G.df <- mutate(pp85G.df, 
+                   niche = factor(case_when(niche %in% gain ~ "Gain")))
+head(pp85G.df)
+
+# extract losses
+loss <- "-1"
+pp85L.df <- filter(changepp85.df, niche %in% loss)
+
+pp85L.df <- mutate(pp85L.df, 
+                   niche = factor(case_when(niche %in% loss ~ "Loss")))
+head(pp85L.df)
+
+# combine dfs
+pp85GL.df <- rbind(pp85G.df, pp85L.df)
+
+# plot
+pp85.f <- ggplot() +
+  geom_raster(data = srtm_df, aes(lon, lat, fill = elev)) +
+  scale_fill_gradient(low = "grey90", high = "grey10") +
+  geom_sf(data = world, col = "black", fill = NA, size = 0.1) +
+  guides(fill = "none") +
+  new_scale_fill() +
+  geom_raster(data = pp85GL.df, aes(lon, lat, fill = niche)) +
+  scale_fill_manual(values =  c("#80cdc1", "#d73027")) +
+  geom_path(data = rivers.df, aes(x = long, y = lat, group = group), 
+            color = "dodgerblue", size = 0.3) +
+  geom_text(data = riv_lab, aes(lon, lat, label = river),
+            color = "white", size = 2, fontface = "bold", angle = -45) +
+  annotation_scale(pad_x = unit(7.7, "cm"), 
+                   pad_y = unit(5.5, "cm"),
+                   height = unit(0.1, "cm"),
+                   text_cex = 0.55) +
+  annotation_north_arrow(which_north = "true", 
+                         height = unit(.6, "cm"),
+                         width = unit(.5, "cm"),
+                         pad_x = unit(0.1, "cm"), 
+                         pad_y = unit(0.1, "cm"),
+                         style = north_arrow_fancy_orienteering) +
+  coord_sf(xlim = c(66, 106.5), 
+           ylim = c(20.8, 39), 
+           expand = FALSE) +
+  theme(legend.key.size = unit(0.4, 'cm'), 
+        legend.key.height = unit(0.4, 'cm'), 
+        legend.key.width = unit(0.4, 'cm'), 
+        legend.title = element_text(size = 7.5, face = "bold"), 
+        legend.text = element_text(size = 7.25),
+        panel.background =  element_rect(fill = "aliceblue"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8),
+        axis.title = element_text(size = 8)) +
+  labs(x = "Longitude", y = "Latitude", fill = "Habitat") 
+pp85.f
 #------------------------------------------------------------------------------------------#
 
 #------------------------------------#
