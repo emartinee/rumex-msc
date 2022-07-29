@@ -37,12 +37,13 @@ library(viridis)
 library(ggspatial)
 library(mapview)
 library(rgdal)
-
+library(dplyr)
 library(ggplot2)
 library(ggfortify)
 library(ggnewscale)
 library(patchwork)
 library(cluster)
+
 library(lfda)
 library(matrixTests)
 library(caTools)
@@ -56,7 +57,6 @@ library(precrec)
 library(RColorBrewer)
 library(cowplot)
 library(scales)
-library(dplyr)
 library(tidyr)
 
 library(plyr)
@@ -1193,9 +1193,9 @@ f3 <- ggplot() +
   geom_text(data = riv_lab, aes(lon, lat, label = river),
             color = "white", size = 2, fontface = "bold", angle = -45) +
   geom_text(data = label_26, aes(lon, lat, label = period),
-            color = "black", size = 5, fontface = "bold") +
-  annotation_scale(pad_x = unit(8.7, "cm"), 
-                   pad_y = unit(6.2, "cm"),
+            color = "black", size = 4, fontface = "bold") +
+  annotation_scale(pad_x = unit(8.1, "cm"), 
+                   pad_y = unit(5.8, "cm"),
                    height = unit(0.1, "cm"),
                    text_cex = 0.55) +
   annotation_north_arrow(which_north = "true", 
@@ -1556,9 +1556,9 @@ f5 <- ggplot() +
   geom_text(data = riv_lab, aes(lon, lat, label = river),
             color = "white", size = 2, fontface = "bold", angle = -45) +
   geom_text(data = label_60, aes(lon, lat, label = period),
-            color = "black", size = 5, fontface = "bold") +
-  annotation_scale(pad_x = unit(8.7, "cm"), 
-                   pad_y = unit(6.2, "cm"),
+            color = "black", size = 4, fontface = "bold") +
+  annotation_scale(pad_x = unit(8.1, "cm"), 
+                   pad_y = unit(5.8, "cm"),
                    height = unit(0.1, "cm"),
                    text_cex = 0.55) +
   annotation_north_arrow(which_north = "true", 
@@ -1743,9 +1743,9 @@ f6 <- ggplot() +
   geom_text(data = riv_lab, aes(lon, lat, label = river),
             color = "white", size = 2, fontface = "bold", angle = -45) +
   geom_text(data = label_85, aes(lon, lat, label = period),
-            color = "black", size = 5, fontface = "bold") +
-  annotation_scale(pad_x = unit(8.7, "cm"), 
-                   pad_y = unit(6.2, "cm"),
+            color = "black", size = 4, fontface = "bold") +
+  annotation_scale(pad_x = unit(8.1, "cm"), 
+                   pad_y = unit(5.8, "cm"),
                    height = unit(0.1, "cm"),
                    text_cex = 0.55) +
   annotation_north_arrow(which_north = "true", 
@@ -1996,27 +1996,27 @@ th1 <- 0.63
 # convert past, current and future prob of occurrences to TSS-thresholded presences and absences
 pa1 <- raster(pp.avg) # create empty raster with same extent and resolution than en1
 pa1[] <- ifelse(pp.avg[] >= th1, 1, 0) # which pixels within pp.avg >= than th, if yes 1, if no 0
-plot(pa1) 
+#plot(pa1) 
 
 pa2 <- raster(p26.avg) # create empty raster with same extent and resolution than en2
 pa2[] <- ifelse(p26.avg[] >= th1, 1, 0) # which pixels within p26.avg >= than th, if yes 1, if no 0
-plot(pa2) 
+#plot(pa2) 
 
 pa3 <- raster(p45.avg) # create empty raster with same extent and resolution than en2
 pa3[] <- ifelse(p45.avg[] >= th1, 1, 0) # which pixels within p45.avg >= than th, if yes 1, if no 0
-plot(pa3)
+#plot(pa3)
 
 pa4 <- raster(p60.avg) # create empty raster with same extent and resolution than en2
 pa4[] <- ifelse(p60.avg[] >= th1, 1, 0) # which pixels within p60.avg >= than th, if yes 1, if no 0
-plot(pa4)
+#plot(pa4)
 
 pa5 <- raster(p85.avg) # create empty raster with same extent and resolution than en2
 pa5[] <- ifelse(p85.avg[] >= th1, 1, 0) # which pixels within p85.avg >= than th, if yes 1, if no 0
-plot(pa5)
+#plot(pa5)
 
 pa6 <- raster(plgm.avg) # create empty raster with same extent and resolution than en1
 pa6[] <- ifelse(plgm.avg[] >= th1, 1, 0) # which pixels within plgm.avg >= than th, if yes 1, if no 0
-plot(pa6) 
+#plot(pa6) 
 
 #---2.6.1.1 LGM - RCP 4.5----
 
@@ -2142,6 +2142,9 @@ head(lgmppL.df)
 # combine dfs
 lgmppGL.df <- rbind(lgmppG.df, lgmppL.df)
 
+# label
+label_lgmpp <- read.csv2("data/spatial/label_lgmpp.csv")
+
 # plot
 lgmpp.f <- ggplot() +
   geom_raster(data = srtm_df, aes(lon, lat, fill = elev)) +
@@ -2155,8 +2158,10 @@ lgmpp.f <- ggplot() +
             color = "dodgerblue", size = 0.3) +
   geom_text(data = riv_lab, aes(lon, lat, label = river),
             color = "white", size = 2, fontface = "bold", angle = -45) +
-  annotation_scale(pad_x = unit(7.7, "cm"), 
-                   pad_y = unit(5.5, "cm"),
+  geom_text(data = label_lgmpp, aes(lon, lat, label = change),
+            color = "black", size = 4, fontface = "bold") +
+  annotation_scale(pad_x = unit(8.1, "cm"), 
+                   pad_y = unit(5.8, "cm"),
                    height = unit(0.1, "cm"),
                    text_cex = 0.55) +
   annotation_north_arrow(which_north = "true", 
@@ -2181,7 +2186,6 @@ lgmpp.f <- ggplot() +
         axis.title = element_text(size = 8)) +
   labs(x = "Longitude", y = "Latitude", fill = "Habitat") 
 lgmpp.f
-
 
 #---2.6.1.3 PP - RCP 4.5----
 
@@ -2213,6 +2217,9 @@ head(pp45L.df)
 # combine dfs
 pp45GL.df <- rbind(pp45G.df, pp45L.df)
 
+# label
+label_pp45 <- read.csv2("data/spatial/label_pp45.csv")
+
 # plot
 pp45.f <- ggplot() +
   geom_raster(data = srtm_df, aes(lon, lat, fill = elev)) +
@@ -2226,8 +2233,10 @@ pp45.f <- ggplot() +
             color = "dodgerblue", size = 0.3) +
   geom_text(data = riv_lab, aes(lon, lat, label = river),
             color = "white", size = 2, fontface = "bold", angle = -45) +
-  annotation_scale(pad_x = unit(7.7, "cm"), 
-                   pad_y = unit(5.5, "cm"),
+  geom_text(data = label_pp45, aes(lon, lat, label = change),
+            color = "black", size = 4, fontface = "bold") +
+  annotation_scale(pad_x = unit(8.1, "cm"), 
+                   pad_y = unit(5.8, "cm"),
                    height = unit(0.1, "cm"),
                    text_cex = 0.55) +
   annotation_north_arrow(which_north = "true", 
@@ -2283,6 +2292,9 @@ head(pp26L.df)
 # combine dfs
 pp26GL.df <- rbind(pp26G.df, pp26L.df)
 
+# label
+label_pp26 <- read.csv2("data/spatial/label_pp26.csv")
+
 # plot
 pp26.f <- ggplot() +
   geom_raster(data = srtm_df, aes(lon, lat, fill = elev)) +
@@ -2296,8 +2308,10 @@ pp26.f <- ggplot() +
             color = "dodgerblue", size = 0.3) +
   geom_text(data = riv_lab, aes(lon, lat, label = river),
             color = "white", size = 2, fontface = "bold", angle = -45) +
-  annotation_scale(pad_x = unit(7.7, "cm"), 
-                   pad_y = unit(5.5, "cm"),
+  geom_text(data = label_pp26, aes(lon, lat, label = change),
+            color = "black", size = 4, fontface = "bold") +
+  annotation_scale(pad_x = unit(8.1, "cm"), 
+                   pad_y = unit(5.8, "cm"),
                    height = unit(0.1, "cm"),
                    text_cex = 0.55) +
   annotation_north_arrow(which_north = "true", 
@@ -2353,6 +2367,9 @@ head(pp60L.df)
 # combine dfs
 pp60GL.df <- rbind(pp60G.df, pp60L.df)
 
+# label
+label_pp60 <- read.csv2("data/spatial/label_pp60.csv")
+
 # plot
 pp60.f <- ggplot() +
   geom_raster(data = srtm_df, aes(lon, lat, fill = elev)) +
@@ -2366,8 +2383,10 @@ pp60.f <- ggplot() +
             color = "dodgerblue", size = 0.3) +
   geom_text(data = riv_lab, aes(lon, lat, label = river),
             color = "white", size = 2, fontface = "bold", angle = -45) +
-  annotation_scale(pad_x = unit(7.7, "cm"), 
-                   pad_y = unit(5.5, "cm"),
+  geom_text(data = label_pp60, aes(lon, lat, label = change),
+            color = "black", size = 4, fontface = "bold") +
+  annotation_scale(pad_x = unit(8.1, "cm"), 
+                   pad_y = unit(5.8, "cm"),
                    height = unit(0.1, "cm"),
                    text_cex = 0.55) +
   annotation_north_arrow(which_north = "true", 
@@ -2423,6 +2442,9 @@ head(pp85L.df)
 # combine dfs
 pp85GL.df <- rbind(pp85G.df, pp85L.df)
 
+# label
+label_pp85 <- read.csv2("data/spatial/label_pp85.csv")
+
 # plot
 pp85.f <- ggplot() +
   geom_raster(data = srtm_df, aes(lon, lat, fill = elev)) +
@@ -2436,8 +2458,10 @@ pp85.f <- ggplot() +
             color = "dodgerblue", size = 0.3) +
   geom_text(data = riv_lab, aes(lon, lat, label = river),
             color = "white", size = 2, fontface = "bold", angle = -45) +
-  annotation_scale(pad_x = unit(7.7, "cm"), 
-                   pad_y = unit(5.5, "cm"),
+  geom_text(data = label_pp85, aes(lon, lat, label = change),
+            color = "black", size = 4, fontface = "bold") +
+  annotation_scale(pad_x = unit(8.1, "cm"), 
+                   pad_y = unit(5.8, "cm"),
                    height = unit(0.1, "cm"),
                    text_cex = 0.55) +
   annotation_north_arrow(which_north = "true", 
@@ -3235,6 +3259,26 @@ ggsave("fig3.png", plot = fig3,      # save as png
        path = "plots/figs", device = "png",
        width = 16, height = 12 , units = c("cm"), dpi = 330)
 
+# Figure 3 new
+layout3new <- "
+AABB
+CCCC
+DDDD
+"
+
+fig3new <- f2 + f4 + lgmpp.f + pp45.f +
+  plot_layout(design = layout3new, heights = c(1, 2, 2)) +
+  plot_annotation(tag_levels = "a") & 
+  theme(plot.tag = element_text(size = 12, face = "bold"))
+
+ggsave("fig3new.pdf", plot = fig3new,      # save as pdf
+       path = "plots/figs", device = "pdf",
+       width = 16, height = 20, units = c("cm"), dpi = 300)
+
+ggsave("fig3new.png", plot = fig3new,      # save as png
+       path = "plots/figs", device = "png",
+       width = 16, height = 20 , units = c("cm"), dpi = 330)
+
 # Figure 4
 layout4 <- "
 AABB
@@ -3255,24 +3299,39 @@ ggsave("fig4.png", plot = fig4,      # save as png
        path = "plots/figs", device = "png",
        width = 16, height = 16 , units = c("cm"), dpi = 330)
 
-# Figure 3 new
-layout3 <- "
-AABB
-CCCC
-DDDD
+# Fig S5
+layout5s <- "
+AAAA
+BBBB
 "
 
-fig3new <- f2 + f4 + lgmpp.f + pp45.f +
-  plot_layout(design = layout3, heights = c(1, 2, 2)) +
+fig5s <- f3 + pp26.f +
+  plot_layout(design = layout5s, heights = c(1, 1)) +
   plot_annotation(tag_levels = "a") & 
   theme(plot.tag = element_text(size = 12, face = "bold"))
 
-ggsave("fig3new.pdf", plot = fig3new,      # save as pdf
-       path = "plots/figs", device = "pdf",
-       width = 16, height = 20, units = c("cm"), dpi = 300)
+ggsave("fig_s5new.png", plot = fig5s,      # save as png
+       path = "plots/suppl", device = "png",
+       width = 16, height = 16 , units = c("cm"), dpi = 330)
 
-ggsave("fig3new.png", plot = fig3new,      # save as png
-       path = "plots/figs", device = "png",
-       width = 16, height = 20 , units = c("cm"), dpi = 330)
+# Fig S6
+fig6s <- f5 + pp60.f +
+  plot_layout(design = layout5s, heights = c(1, 1)) +
+  plot_annotation(tag_levels = "a") & 
+  theme(plot.tag = element_text(size = 12, face = "bold"))
+
+ggsave("fig_s6new.png", plot = fig6s,      # save as png
+       path = "plots/suppl", device = "png",
+       width = 16, height = 16 , units = c("cm"), dpi = 330)
+
+# Fig S7
+fig7s <- f6 + pp85.f +
+  plot_layout(design = layout5s, heights = c(1, 1)) +
+  plot_annotation(tag_levels = "a") & 
+  theme(plot.tag = element_text(size = 12, face = "bold"))
+
+ggsave("fig_s7new.png", plot = fig7s,      # save as png
+       path = "plots/suppl", device = "png",
+       width = 16, height = 16 , units = c("cm"), dpi = 330)
 #--------------------------------------------------------------------------#
 ####---STOP---####
